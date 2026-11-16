@@ -65,6 +65,7 @@ jobs:
           } > body.md
           gh issue create --repo "${{ github.repository }}" \
             --title "🔔 学科試験 有空位 $(date '+%m/%d %H:%M')" \
+            --assignee "${{ github.repository_owner }}" \
             --body-file body.md
 
       - name: 保存状态
