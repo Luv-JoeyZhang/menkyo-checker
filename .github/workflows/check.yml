@@ -3,6 +3,9 @@ name: 学科試験 空位检查
 on:
   schedule:
     - cron: "*/10 * * * *"   # 约每 10 分钟一次（GitHub 的定时可能有延迟）
+  push:
+    paths:
+      - ".github/test-notify"  # 改动这个文件 = 发一条测试提醒
   workflow_dispatch:          # 允许在 Actions 页面手动运行
     inputs:
       test_notify:
@@ -45,7 +48,7 @@ jobs:
           python3 menkyo_checker.py --once
 
       - name: 测试提醒
-        if: github.event_name == 'workflow_dispatch' && inputs.test_notify
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_notify)
         run: printf '**这是一条测试提醒**\n\n如果手机收到了推送，说明通知正常 ✅ 这个 Issue 可以直接关闭。\n\n' >> notify.md
 
       - name: 通过 GitHub 提醒（新建 Issue 并 @ 仓库主人）
