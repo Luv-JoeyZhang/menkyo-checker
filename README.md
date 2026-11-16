@@ -11,8 +11,8 @@
 1. 手机安装 ntfy App，订阅一个只有自己知道的主题名（例如 `menkyo-随机字母数字`）
 2. 仓库 Settings → Secrets and variables → Actions → **Secrets** → 新建 `NTFY_TOPIC`，值填同一个主题名
 3. （可选）同一页面的 **Variables** → 新建 `COURSE_CODE`
-   - `11` = 教習所卒業等・只要普通免許証（默认）
-   - `61` = 教習所卒業等・要マイナ免許証
+   - `61` = 教習所卒業等・要マイナ免許証（默认）
+   - `11` = 教習所卒業等・只要普通免許証
 4. Actions 页面 → 「学科試験 空位检查」→ Run workflow 手动跑一次确认
 
 日期范围、排除日期等其他设置在 `menkyo_checker.py` 开头修改。

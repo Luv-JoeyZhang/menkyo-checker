@@ -35,7 +35,7 @@ PLACES = {"270": "府中", "280": "鮫洲", "250": "江東"}
 #   "11" = 教習所卒業等 + 只要普通的免許証
 #   "61" = 教習所卒業等 + 要マイナ免許証（マイナ単独 或 两张都要）
 # 两种的名额是分开显示的，请选自己实际要办的那种。
-COURSE_CODE = os.environ.get("COURSE_CODE") or "11"
+COURSE_CODE = os.environ.get("COURSE_CODE") or "61"
 
 # 只关心这个日期范围内的空位（None = 不限制）。格式 "2026-12-25"
 EARLIEST_DATE = None
