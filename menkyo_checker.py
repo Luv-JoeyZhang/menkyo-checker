@@ -154,6 +154,14 @@ def check_all():
 
 def notify(title, message):
     log(f"🔔 {title}: {message}")
+    # 云端运行时把提醒写进文件，由 workflow 通过 GitHub（Issue + @提及）通知
+    notify_file = os.environ.get("MENKYO_NOTIFY_FILE")
+    if notify_file:
+        try:
+            with open(notify_file, "a", encoding="utf-8") as f:
+                f.write(f"**{title}**\n\n{message}\n\n")
+        except OSError as e:
+            log(f"  ! 提醒文件写入失败: {e}")
     system = platform.system()
     try:
         if system == "Darwin":
@@ -246,8 +254,6 @@ def main():
         return
     interval = max(INTERVAL_MIN, MIN_INTERVAL_MIN)
     state = load_state()
-    if not NTFY_TOPIC and os.environ.get("GITHUB_ACTIONS"):
-        log("⚠️ 没有设置 NTFY_TOPIC，发现空位也无法推送到手机")
     log(
         f"开始检查: 考场={'・'.join(PLACES.values())} 区分={COURSE_CODE} "
         f"间隔={interval}分钟 (Ctrl+C 停止)"

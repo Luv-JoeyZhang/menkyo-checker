@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: menkyo-check
@@ -32,10 +33,26 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           COURSE_CODE: ${{ vars.COURSE_CODE }}
           MENKYO_STATE_FILE: state/menkyo_state.json
+          MENKYO_NOTIFY_FILE: notify.md
           MENKYO_STRICT: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: |
           mkdir -p state
           python3 menkyo_checker.py --once
+
+      - name: 通过 GitHub 提醒（新建 Issue 并 @ 仓库主人）
+        if: hashFiles('notify.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            cat notify.md
+            echo "👉 预约网站: https://license-test.tokyo-madoguchi-yoyaku.com/police-pref-tokyo/index.html"
+            echo
+            echo "@${{ github.repository_owner }}"
+          } > body.md
+          gh issue create --repo "${{ github.repository }}" \
+            --title "🔔 学科試験 有空位 $(date '+%m/%d %H:%M')" \
+            --body-file body.md
 
       - name: 保存状态
         if: always()
