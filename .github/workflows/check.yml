@@ -2,7 +2,7 @@ name: 学科試験 空位检查
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # 约每 10 分钟一次（GitHub 的定时可能有延迟）
+    - cron: "3-59/10 * * * *"   # 每小时的 03、13、23…分，约每 10 分钟一次（避开整点高峰；GitHub 的定时可能有延迟）
   push:
     paths:
       - ".github/test-notify"  # 改动这个文件 = 发一条测试提醒
