@@ -55,6 +55,7 @@ jobs:
         if: hashFiles('notify.md') != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          TZ: Asia/Tokyo
         run: |
           {
             cat notify.md
