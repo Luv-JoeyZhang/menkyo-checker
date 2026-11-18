@@ -179,19 +179,34 @@ def notify(title, message):
             sys.stdout.write("\a")
     except Exception as e:
         log(f"  ! 桌面通知失败: {e}")
-    if NTFY_TOPIC:
+    topic = NTFY_TOPIC.strip()
+    if topic:
         try:
+            # 用 JSON 方式发布，中文标题不会乱码
+            payload = {
+                "topic": topic,
+                "title": title,
+                "message": message,
+                "priority": 5,
+                "click": BOOKING_URL,
+            }
             req = urllib.request.Request(
-                f"https://ntfy.sh/{urllib.parse.quote(NTFY_TOPIC)}",
-                data=message.encode("utf-8"),
-                headers={
-                    "Title": urllib.parse.quote(title),
-                    "Priority": "high",
-                    "Click": BOOKING_URL,
-                },
+                "https://ntfy.sh/",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
                 method="POST",
             )
-            urllib.request.urlopen(req, timeout=20).close()
+            # ntfy.sh 对共享 IP 偶尔会限流(429)，失败时重试几次
+            for attempt in range(4):
+                try:
+                    with urllib.request.urlopen(req, timeout=20) as resp:
+                        log(f"  手机推送已发送 (ntfy HTTP {resp.status}, 主题名长度 {len(topic)})")
+                    break
+                except urllib.error.HTTPError as e:
+                    if e.code == 429 and attempt < 3:
+                        time.sleep(15 * (attempt + 1))
+                        continue
+                    raise
         except Exception as e:
             log(f"  ! 手机推送失败: {e}")
 
