@@ -49,7 +49,13 @@ jobs:
 
       - name: 测试提醒
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_notify)
-        run: printf '**这是一条测试提醒**\n\n如果手机收到了推送，说明通知正常 ✅ 这个 Issue 可以直接关闭。\n\n' >> notify.md
+        env:
+          TZ: Asia/Tokyo
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          MENKYO_NOTIFY_FILE: notify.md
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "NTFY_TOPIC 未设置"; else echo "NTFY_TOPIC 已设置"; fi
+          python3 menkyo_checker.py --test
 
       - name: 通过 GitHub 提醒（新建 Issue 并 @ 仓库主人）
         if: hashFiles('notify.md') != ''
