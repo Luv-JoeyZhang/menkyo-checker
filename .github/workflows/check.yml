@@ -15,7 +15,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   group: menkyo-check
@@ -41,7 +40,6 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           COURSE_CODE: ${{ vars.COURSE_CODE }}
           MENKYO_STATE_FILE: state/menkyo_state.json
-          MENKYO_NOTIFY_FILE: notify.md
           MENKYO_STRICT: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: |
           mkdir -p state
@@ -52,27 +50,9 @@ jobs:
         env:
           TZ: Asia/Tokyo
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          MENKYO_NOTIFY_FILE: notify.md
         run: |
           if [ -z "$NTFY_TOPIC" ]; then echo "NTFY_TOPIC 未设置"; else echo "NTFY_TOPIC 已设置"; fi
           python3 menkyo_checker.py --test
-
-      - name: 通过 GitHub 提醒（新建 Issue 并 @ 仓库主人）
-        if: hashFiles('notify.md') != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TZ: Asia/Tokyo
-        run: |
-          {
-            cat notify.md
-            echo "👉 预约网站: https://license-test.tokyo-madoguchi-yoyaku.com/police-pref-tokyo/index.html"
-            echo
-            echo "@${{ github.repository_owner }}"
-          } > body.md
-          gh issue create --repo "${{ github.repository }}" \
-            --title "🔔 学科試験 有空位 $(date '+%m/%d %H:%M')" \
-            --assignee "${{ github.repository_owner }}" \
-            --body-file body.md
 
       - name: 保存状态
         if: always()
