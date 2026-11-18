@@ -135,20 +135,26 @@ def check_all():
     openings, errors, latest_published = {}, 0, ""
     weekdays = "月火水木金土日"
     for yyyymm in months_to_check():
+        month_rows, month_errors = 0, 0
         for code, name in PLACES.items():
             try:
                 remain = fetch_month(yyyymm, code)
             except Exception as e:  # 网络错误等：记下来，下一轮再试
                 errors += 1
+                month_errors += 1
                 log(f"  ! {name} {yyyymm} 获取失败: {e}")
                 remain = {}
+            month_rows += len(remain)
             for date_str, left in remain.items():
                 latest_published = max(latest_published, date_str)
                 if left > 0 and wanted(date_str):
                     d = dt.datetime.strptime(date_str, "%Y%m%d").date()
                     key = f"{name} {d.isoformat()}({weekdays[d.weekday()]})"
                     openings[key] = left
-            time.sleep(1.5)  # 请求之间留间隔，别给网站添负担
+            time.sleep(0.5)  # 请求之间留间隔，别给网站添负担
+        # 这个月三个考场都还没公开名额 → 更后面的月份也不会有，不必再查
+        if month_rows == 0 and month_errors == 0 and yyyymm > f"{dt.date.today():%Y%m}":
+            break
     return openings, errors, latest_published
 
 
@@ -254,8 +260,8 @@ def run_once(state):
         state["latest_published"] = max(latest, prev_latest)
 
     # 连续全部失败时提醒一次（--once 模式下靠状态文件跨次计数，供云端定时运行使用）
-    total = len(PLACES) * MONTHS_AHEAD
-    streak = state.get("fail_streak", 0) + 1 if errors >= total else 0
+    all_failed = errors > 0 and not latest
+    streak = state.get("fail_streak", 0) + 1 if all_failed else 0
     state["fail_streak"] = streak
     if streak == 6:
         notify("学科試験チェッカー", "连续多次无法获取数据，网站可能在维护或接口有变化，请看一下")

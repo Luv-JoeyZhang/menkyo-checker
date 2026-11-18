@@ -40,7 +40,6 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           COURSE_CODE: ${{ vars.COURSE_CODE }}
           MENKYO_STATE_FILE: state/menkyo_state.json
-          MENKYO_STRICT: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: |
           mkdir -p state
           python3 menkyo_checker.py --once
